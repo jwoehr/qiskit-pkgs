@@ -4,10 +4,19 @@ on:
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        registry: [docker.pkg.github.com, ghcr.io]
+
     runs-on: ubuntu-latest
 
+    env:
+      PULL_IMAGE: 'quay.io/pypa/manylinux2014_s390x'
+      PUSH_IMAGE: '${{ matrix.registry }}/${{ github.repository }}/test:latest'
+
     steps:
-      - run: docker login https://docker.pkg.github.com -u token -p ${{ secrets.PACKAGES_TOKEN }}
-      - run: docker pull alpine
-      - run: docker tag alpine docker.pkg.github.com/mtreinish/manylinux-qiskit/test:latest
-      - run: docker push docker.pkg.github.com/mtreinish/manylinux-qiskit/test:latest
+      - run: docker login https://${{ matrix.registry }} -u token -p ${{ secrets.PACKAGES_TOKEN }}
+      - run: docker pull ${{ env.PULL_IMAGE }}
+      - run: docker tag ${{ env.PULL_IMAGE }} ${{ env.PUSH_IMAGE }}
+      - run: docker push ${{ env.PUSH_IMAGE }}
