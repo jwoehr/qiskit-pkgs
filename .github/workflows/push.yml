@@ -4,14 +4,19 @@ on:
 
 jobs:
   build:
+    strategy:
+      fail-fast: false
+      matrix:
+        registry: [docker.pkg.github.com, ghcr.io]
+
     runs-on: ubuntu-latest
 
     env:
       PULL_IMAGE: 's390x/bash:4.4'
-      PUSH_IMAGE: 'docker.pkg.github.com/${{ github.repository }}/test:latest'
+      PUSH_IMAGE: '${{ matrix.registry }}/${{ github.repository }}/test:latest'
 
     steps:
-      - run: docker login https://docker.pkg.github.com -u token -p ${{ secrets.PACKAGES_TOKEN }}
+      - run: docker login https://${{ matrix.registry }} -u token -p ${{ secrets.PACKAGES_TOKEN }}
       - run: docker pull ${{ env.PULL_IMAGE }}
       - run: docker tag ${{ env.PULL_IMAGE }} ${{ env.PUSH_IMAGE }}
       - run: docker push ${{ env.PUSH_IMAGE }}
