@@ -1,0 +1,13 @@
+# Re: GitHub Packages #828505
+on:
+  push:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - run: docker login https://docker.pkg.github.com -u token -p ${{ secrets.PACKAGES_TOKEN }}
+      - run: docker pull alpine
+      - run: docker tag alpine docker.pkg.github.com/mtreinish/manylinux-qiskit/test:latest
+      - run: docker push docker.pkg.github.com/mtreinish/manylinux-qiskit/test:latest
